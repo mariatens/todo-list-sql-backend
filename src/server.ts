@@ -23,25 +23,13 @@ app.use(express.json());
 app.get("/", async (req, res) => {
   await client.connect();
   const tasks = await client.query("select * from to_dos order by time desc limit 100"); 
-  res.status(200).json({
-    status: "success",
-    data: {
-      tasks
-    },
-  });
-  client.end()
+  res.json(tasks.rows)
 });
 
 app.get("/completed-tasks", async (req, res) => {
   await client.connect();
   const tasks = await client.query("select * from completed_dos order by completed_time desc limit 100"); 
-  res.status(200).json({
-    status: "success",
-    data: {
-      tasks
-    },
-  });
-  client.end()
+  res.status(200).json(tasks.rows);
 });
 
 app.get("/:id", async (req, res) => {
@@ -55,34 +43,23 @@ app.get("/:id", async (req, res) => {
   const query = await client.query(task, searchedId) 
 
   if (task) {
-    res.status(200).json({
-      status: "success",
-      data: {
-        query,
-      },
-    });
-  } else {
-    res.status(404).json({
+    res.json(query.rows)
+      }
+  else {
+   res.status(404).json({
       status: "fail",
       data: {
         id: "Could not find a task with that id identifier",
       },
     });
   }
-  client.end()
 });
 
 app.post("/", async (req, res) => {
   await client.connect();
   const { task } = req.body;
   const createdTask = await client.query("insert into to_dos (task) values ($1)", [task]); 
-    res.status(201).json({
-      status: "success",
-      data: {
-        task: createdTask, //return the relevant data (including its db-generated id)
-      },
-    });
-    client.end()
+    res.json(createdTask.rows) //return the relevant data (including its db-generated id)
   })
 
 //update a task
@@ -94,12 +71,7 @@ app.put("/:id", async (req, res) => {
   const result: any = await client.query("UPDATE to_dos SET task = $1 where id =$2", [task, id]); 
     if (result.rowCount === 1) {
       const updatedTask = result.rows[0];
-      res.status(200).json({
-        status: "success",
-        data: {
-          task: updatedTask,
-        },
-      });
+      res.json(result.rows);
     } else {
       res.status(404).json({
         status: "fail",
@@ -108,7 +80,6 @@ app.put("/:id", async (req, res) => {
         },
       });
     }
-  client.end()
   })
 
 app.delete("/:id", async (req, res) => {
@@ -133,7 +104,6 @@ app.delete("/:id", async (req, res) => {
       },
     });
   }
-  client.end()
 });
 
 export default app;
