@@ -5,10 +5,6 @@ import dotenv from "dotenv";
 
 dotenv.config(); //read any .env file(s)
 
-if (!process.env.DATABASE_URL) {
-  throw "No DATABASE_URL env var provided.  Did you create an .env file?";
-}
-
 const client = new Client({connectionString: process.env.DATABASE_URL});
 
 const app = express();
