@@ -17,24 +17,24 @@ app.use(cors());
  */
 app.use(express.json());
 
-//When this route is called, return the most recent 100 signatures in the db
+//When this route is called, return the most recent 100 tasks in the db
 app.get("/", async (req, res) => {
   await client.connect();
-  const signatures = await client.query("select * from to_dos order by time desc limit 100"); //FIXME-TASK: get signatures from db!
+  const tasks = await client.query("select * from to_dos order by time desc limit 100"); 
   res.status(200).json({
     status: "success",
     data: {
-      signatures
+      tasks
     },
   });
 });
 
 app.get("/completed-tasks", async (req, res) => {
-  const signatures = await client.query("select * from completed_dos order by time desc limit 100"); //FIXME-TASK: get signatures from db!
+  const tasks = await client.query("select * from completed_dos order by time desc limit 100"); 
   res.status(200).json({
     status: "success",
     data: {
-      signatures
+      tasks
     },
   });
 });
@@ -44,11 +44,11 @@ app.get("/:id", async (req, res) => {
   //  see documentation: https://expressjs.com/en/guide/routing.html
   const id = parseInt(req.params.id); // params are always string type
 
-  const signature = "select * from to_dos where id = $1";   ////FIXME-TASK get the signature row from the db (match on id)
+  const task = "select * from to_dos where id = $1";  
   const searchedId = [id]
-  const query = await client.query(signature, searchedId) 
+  const query = await client.query(task, searchedId) 
 
-  if (signature) {
+  if (task) {
     res.status(200).json({
       status: "success",
       data: {
@@ -59,7 +59,7 @@ app.get("/:id", async (req, res) => {
     res.status(404).json({
       status: "fail",
       data: {
-        id: "Could not find a signature with that id identifier",
+        id: "Could not find a task with that id identifier",
       },
     });
   }
@@ -68,27 +68,27 @@ app.get("/:id", async (req, res) => {
 app.post("/", async (req, res) => {
   await client.connect();
   const { task } = req.body;
-  const createdSignature = await client.query("insert into to_dos (task) values ($1)", [task]); 
+  const createdTask = await client.query("insert into to_dos (task) values ($1)", [task]); 
     res.status(201).json({
       status: "success",
       data: {
-        signature: createdSignature, //return the relevant data (including its db-generated id)
+        task: createdTask, //return the relevant data (including its db-generated id)
       },
     });})
 
-//update a signature.
+//update a task
 app.put("/:id", async (req, res) => {
   //  :id refers to a route parameter, which will be made available in req.params.id
   await client.connect();
   const { task } = req.body;
   const id = parseInt(req.params.id);
-  const result: any = await client.query("UPDATE to_dos SET task = $1 where id =$2 returning *", [task, id]); 
+  const result: any = await client.query("UPDATE to_dos SET task = $1 where id =$2", [task, id]); 
     if (result.rowCount === 1) {
-      const updatedSignature = result.rows[0];
+      const updatedTask = result.rows[0];
       res.status(200).json({
         status: "success",
         data: {
-          signature: updatedSignature,
+          task: updatedTask,
         },
       });
     } else {
@@ -104,7 +104,7 @@ app.put("/:id", async (req, res) => {
 
 app.delete("/:id", async (req, res) => {
   const id = parseInt(req.params.id); // params are string type
-  const queryResult: any = await client.query("DELETE FROM signatures WHERE id = $1", [id]); 
+  const queryResult: any = await client.query("DELETE FROM to_dos WHERE id = $1", [id]); 
   const didRemove = queryResult.rowCount === 1;
 
   if (didRemove) {
@@ -119,7 +119,7 @@ app.delete("/:id", async (req, res) => {
     res.status(404).json({
       status: "fail",
       data: {
-        id: "Could not find a signature with that id identifier",
+        id: "Could not find a task with that id identifier",
       },
     });
   }
