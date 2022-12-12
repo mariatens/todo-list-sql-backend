@@ -33,7 +33,7 @@ app.get("/", async (req, res) => {
 
 app.get("/completed-tasks", async (req, res) => {
   await client.connect();
-  const tasks = await client.query("select * from completed_dos order by time desc limit 100"); 
+  const tasks = await client.query("select * from completed_dos order by completed_time desc limit 100"); 
   res.status(200).json({
     status: "success",
     data: {
