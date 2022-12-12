@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import { Client } from "pg";
-
+require("dotenv").config();
 
 const client = new Client(process.env.DATABASE_URL);
 
@@ -30,6 +30,7 @@ app.get("/", async (req, res) => {
 });
 
 app.get("/completed-tasks", async (req, res) => {
+  await client.connect();
   const tasks = await client.query("select * from completed_dos order by time desc limit 100"); 
   res.status(200).json({
     status: "success",
@@ -42,8 +43,9 @@ app.get("/completed-tasks", async (req, res) => {
 app.get("/:id", async (req, res) => {
   // :id indicates a "route parameter", available as req.params.id
   //  see documentation: https://expressjs.com/en/guide/routing.html
+  
   const id = parseInt(req.params.id); // params are always string type
-
+  await client.connect();
   const task = "select * from to_dos where id = $1";  
   const searchedId = [id]
   const query = await client.query(task, searchedId) 
@@ -103,6 +105,7 @@ app.put("/:id", async (req, res) => {
   })
 
 app.delete("/:id", async (req, res) => {
+  await client.connect();
   const id = parseInt(req.params.id); // params are string type
   const queryResult: any = await client.query("DELETE FROM to_dos WHERE id = $1", [id]); 
   const didRemove = queryResult.rowCount === 1;
