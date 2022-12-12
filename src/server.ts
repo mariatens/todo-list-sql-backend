@@ -1,9 +1,15 @@
 import express from "express";
 import cors from "cors";
 import { Client } from "pg";
-require("dotenv").config();
+import dotenv from "dotenv";
 
-const client = new Client(process.env.DATABASE_URL);
+dotenv.config(); //read any .env file(s)
+
+if (!process.env.DATABASE_URL) {
+  throw "No DATABASE_URL env var provided.  Did you create an .env file?";
+}
+
+const client = new Client({connectionString: process.env.DATABASE_URL});
 
 const app = express();
 
