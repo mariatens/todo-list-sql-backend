@@ -29,6 +29,7 @@ app.get("/", async (req, res) => {
       tasks
     },
   });
+  client.end()
 });
 
 app.get("/completed-tasks", async (req, res) => {
@@ -40,6 +41,7 @@ app.get("/completed-tasks", async (req, res) => {
       tasks
     },
   });
+  client.end()
 });
 
 app.get("/:id", async (req, res) => {
@@ -67,6 +69,7 @@ app.get("/:id", async (req, res) => {
       },
     });
   }
+  client.end()
 });
 
 app.post("/", async (req, res) => {
@@ -78,7 +81,9 @@ app.post("/", async (req, res) => {
       data: {
         task: createdTask, //return the relevant data (including its db-generated id)
       },
-    });})
+    });
+    client.end()
+  })
 
 //update a task
 app.put("/:id", async (req, res) => {
@@ -102,8 +107,8 @@ app.put("/:id", async (req, res) => {
           id: "Could not find a task with that id identifier",
         },
       });
-
     }
+  client.end()
   })
 
 app.delete("/:id", async (req, res) => {
@@ -128,6 +133,7 @@ app.delete("/:id", async (req, res) => {
       },
     });
   }
+  client.end()
 });
 
 export default app;
