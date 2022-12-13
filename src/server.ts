@@ -5,7 +5,7 @@ import dotenv from "dotenv";
 
 dotenv.config(); //read any .env file(s)
 
-const client = new Client({connectionString: process.env.DATABASE_URL});
+const client = new Client({ connectionString: process.env.DATABASE_URL });
 console.log("create a client")
 const app = express();
 
@@ -21,33 +21,42 @@ app.use(express.json());
 console.log("attempt to connect to client")
 
 client.connect();
-console.log("connected client")
+console.log("started client connect")
 
 //When this route is called, return the most recent 100 tasks in the db
-app.get("/", async (req, res) => {
-  const tasks = await client.query("select * from to_dos order by time desc"); 
+app.get("/tasks", async (req, res) => {
+  const tasks = await client.query("select * from to_dos order by time desc");
   res.json(tasks.rows)
 });
 
 app.get("/completed-tasks", async (req, res) => {
-  const tasks = await client.query("select * from completed_dos order by completed_time desc limit 100"); 
+  const tasks = await client.query("select * from completed_dos order by completed_time desc limit 100");
   res.status(200).json(tasks.rows);
 });
 
-app.get("/:id", async (req, res) => {
+app.get("/tasks/:id", async (req, res) => {
   // :id indicates a "route parameter", available as req.params.id
   //  see documentation: https://expressjs.com/en/guide/routing.html
-  
+
   const id = parseInt(req.params.id); // params are always string type
-  const task = "select * from to_dos where id = $1";  
+  if (isNaN(id)) {
+    res.status(404).json({
+      status: "fail",
+      data: {
+        id: "Could not find a task with that id identifier",
+      },
+    })
+    return
+  }
+  const task = "select * from to_dos where id = $1";
   const searchedId = [id]
-  const query = await client.query(task, searchedId) 
+  const query = await client.query(task, searchedId)
 
   if (task) {
     res.json(query.rows)
-      }
+  }
   else {
-   res.status(404).json({
+    res.status(404).json({
       status: "fail",
       data: {
         id: "Could not find a task with that id identifier",
@@ -58,32 +67,32 @@ app.get("/:id", async (req, res) => {
 
 app.post("/", async (req, res) => {
   const { task } = req.body;
-  const createdTask = await client.query("insert into to_dos (task) values ($1)", [task]); 
-    res.json(createdTask.rows) //return the relevant data (including its db-generated id)
-  })
+  const createdTask = await client.query("insert into to_dos (task) values ($1)", [task]);
+  res.json(createdTask.rows) //return the relevant data (including its db-generated id)
+})
 
 //update a task
 app.put("/:id", async (req, res) => {
   //  :id refers to a route parameter, which will be made available in req.params.id
   const { task } = req.body;
   const id = parseInt(req.params.id);
-  const result: any = await client.query("UPDATE to_dos SET task = $1 where id =$2", [task, id]); 
-    if (result.rowCount === 1) {
-      const updatedTask = result.rows[0];
-      res.json(result.rows);
-    } else {
-      res.status(404).json({
-        status: "fail",
-        data: {
-          id: "Could not find a task with that id identifier",
-        },
-      });
-    }
-  })
+  const result: any = await client.query("UPDATE to_dos SET task = $1 where id =$2", [task, id]);
+  if (result.rowCount === 1) {
+    const updatedTask = result.rows[0];
+    res.json(result.rows);
+  } else {
+    res.status(404).json({
+      status: "fail",
+      data: {
+        id: "Could not find a task with that id identifier",
+      },
+    });
+  }
+})
 
 app.delete("/:id", async (req, res) => {
   const id = parseInt(req.params.id); // params are string type
-  const queryResult: any = await client.query("DELETE FROM to_dos WHERE id = $1", [id]); 
+  const queryResult: any = await client.query("DELETE FROM to_dos WHERE id = $1", [id]);
   const didRemove = queryResult.rowCount === 1;
 
   if (didRemove) {
