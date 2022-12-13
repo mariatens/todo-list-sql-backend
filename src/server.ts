@@ -65,14 +65,14 @@ app.get("/tasks/:id", async (req, res) => {
   }
 });
 
-app.post("/", async (req, res) => {
+app.post("/tasks", async (req, res) => {
   const { task } = req.body;
   const createdTask = await client.query("insert into to_dos (task) values ($1)", [task]);
   res.json(createdTask.rows) //return the relevant data (including its db-generated id)
 })
 
 //update a task
-app.put("/:id", async (req, res) => {
+app.put("/tasks:id", async (req, res) => {
   //  :id refers to a route parameter, which will be made available in req.params.id
   const { task } = req.body;
   const id = parseInt(req.params.id);
@@ -90,7 +90,7 @@ app.put("/:id", async (req, res) => {
   }
 })
 
-app.delete("/:id", async (req, res) => {
+app.delete("/tasks/:id", async (req, res) => {
   const id = parseInt(req.params.id); // params are string type
   const queryResult: any = await client.query("DELETE FROM to_dos WHERE id = $1", [id]);
   const didRemove = queryResult.rowCount === 1;
