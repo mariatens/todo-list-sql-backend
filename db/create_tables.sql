@@ -17,6 +17,9 @@ CREATE TABLE completed_dos (
 	completed_time timestamp not null default now()
 );
 
+INSERT INTO to_dos (task)
+VALUES ('fix the backend of my app');
+
 
 
 
