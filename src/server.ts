@@ -71,8 +71,15 @@ app.post("/tasks", async (req, res) => {
   res.json(createdTask.rows) //return the relevant data (including its db-generated id)
 })
 
+app.post("/completed-tasks", async (req, res) => {
+  const { task } = req.body;
+  const createdTask = await client.query("insert into completed_dos (task) values ($1)", [task]);
+  res.json(createdTask.rows) //return the relevant data (including its db-generated id)
+})
+
+
 //update a task
-app.put("/tasks:id", async (req, res) => {
+app.patch("/tasks:id", async (req, res) => {
   //  :id refers to a route parameter, which will be made available in req.params.id
   const { task } = req.body;
   const id = parseInt(req.params.id);
