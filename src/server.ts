@@ -79,7 +79,7 @@ app.post("/completed-tasks", async (req, res) => {
 
 
 //update a task
-app.patch("/tasks:id", async (req, res) => {
+app.patch("/tasks/:id", async (req, res) => {
   //  :id refers to a route parameter, which will be made available in req.params.id
   const { task } = req.body;
   const id = parseInt(req.params.id);
